@@ -20,6 +20,7 @@ def iter_title_actors(
 ) -> Generator[TitleActor, None, None]:
     with open(title_principals_filename, "r") as tsvfile:
         principals_reader = csv.reader(tsvfile, delimiter="\t")
+        next(principals_reader)
         for row in principals_reader:
             if row[3] == "actor":
                 yield TitleActor(row[0], row[2])
@@ -28,6 +29,7 @@ def iter_title_actors(
 def iter_title_names(title_basics_filename: str) -> Generator[IdName, None, None]:
     with open(title_basics_filename, "r") as tsvfile:
         basics_reader = csv.reader(tsvfile, delimiter="\t")
+        next(basics_reader)
         for row in basics_reader:
             yield IdName(row[0], row[2])
 
@@ -35,5 +37,6 @@ def iter_title_names(title_basics_filename: str) -> Generator[IdName, None, None
 def iter_actor_names(name_basics_filename: str) -> Generator[IdName, None, None]:
     with open(name_basics_filename, "r") as tsvfile:
         basics_reader = csv.reader(tsvfile, delimiter="\t")
+        next(basics_reader)
         for row in basics_reader:
             yield IdName(row[0], row[1])

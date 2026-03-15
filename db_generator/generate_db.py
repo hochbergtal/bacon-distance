@@ -8,6 +8,32 @@ DEFAULT_RESULT_NAME = "db.json"
 
 
 def main() -> None:
+    """Read the TVS dataset files and create a DB file from it.
+    Assumes CWD has files with the global file names. If a command-line arg is given it's the result file path, otherwise it's "db.json".
+    The DB is a json file of the following format:
+    {
+        "titles": {
+            "[title_id]": {
+                "actors": [
+                    "[actor_id]",
+                    ...
+                ],
+                "name": "..."
+            },
+            ...
+        },
+        "actors": {
+            "[actor_id]": {
+                "titles": [
+                    "[title_id]",
+                    ...
+                ],
+                "name": "..."
+            },
+            ...
+        }
+    }
+    """
     if len(sys.argv) == 1:
         result_file_path = DEFAULT_RESULT_NAME
     elif len(sys.argv) == 2:

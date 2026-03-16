@@ -1,5 +1,5 @@
 import sys
-from sql_parser import DataParser
+from data_parser import DataParser
 
 TITLE_PRINCIPALS_NAME = "title.principals.tsv"
 TITLE_BASICS_NAME = "title.basics.tsv"
@@ -8,31 +8,8 @@ DEFAULT_RESULT_NAME = "bacon.db"
 
 
 def main() -> None:
-    """Read the TVS dataset files and create a DB file from it.
-    Assumes CWD has files with the global file names. If a command-line arg is given it's the result file path, otherwise it's "db.json".
-    The DB is a json file of the following format:
-    {
-        "titles": {
-            "[title_id]": {
-                "actors": [
-                    "[actor_id]",
-                    ...
-                ],
-                "name": "..."
-            },
-            ...
-        },
-        "actors": {
-            "[actor_id]": {
-                "titles": [
-                    "[title_id]",
-                    ...
-                ],
-                "name": "..."
-            },
-            ...
-        }
-    }
+    """Read the TVS dataset files and create an sqlite DB file from it.
+    Assumes CWD has files with the global file names. If a command-line arg is given it's the result file path, otherwise it's "bacon.db".
     """
     if len(sys.argv) == 1:
         result_file_path = DEFAULT_RESULT_NAME

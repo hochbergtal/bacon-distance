@@ -1,4 +1,5 @@
 import sys
+import time
 from data_parser import DataParser
 
 TITLE_PRINCIPALS_NAME = "title.principals.tsv"
@@ -23,12 +24,24 @@ def main() -> None:
         result_file_path, TITLE_PRINCIPALS_NAME, TITLE_BASICS_NAME, NAME_BASICS_NAME
     ) as parser:
         print("DB generation started.")
+
         print("filling titles and actors ID...")
+        start = time.time()
         parser.fill_ids()
+        end = time.time()
+        print(f"Took {end - start} seconds")
+
         print("filling title names...")
+        start = end
         parser.fill_title_names()
+        end = time.time()
+        print(f"Took {end - start} seconds")
+
         print("filling actor names...")
+        start = end
         parser.fill_actor_names()
+        end = time.time()
+        print(f"Took {end - start} seconds")
 
 
 if __name__ == "__main__":

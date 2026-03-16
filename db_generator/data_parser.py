@@ -80,28 +80,21 @@ class DataParser:
                 """
             )
 
-            try:
-                self.db_cursor.execute(
-                    f"""
-                    INSERT INTO {TITLES_TABLE} VALUES (
-                        '{title_actor.title_id}', null                  
-                    )
-                    """
+            self.db_cursor.execute(
+                f"""
+                INSERT OR IGNORE INTO {TITLES_TABLE} VALUES (
+                    '{title_actor.title_id}', null                  
                 )
-            except sqlite3.IntegrityError:
-                # avoid error if the id is already there
-                pass
+                """
+            )
 
-            try:
-                self.db_cursor.execute(
-                    f"""
-                    INSERT INTO {ACTORS_TABLE} VALUES (
-                        '{title_actor.actor_id}', null                  
-                    )
-                    """
+            self.db_cursor.execute(
+                f"""
+                INSERT OR IGNORE INTO {ACTORS_TABLE} VALUES (
+                    '{title_actor.actor_id}', null                  
                 )
-            except sqlite3.IntegrityError:
-                pass
+                """
+            )
 
     def fill_title_names(self) -> None:
         """Fill the titles' names from the given files to the DB."""

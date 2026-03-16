@@ -102,7 +102,7 @@ class DataParser:
             self.db_cursor.execute(
                 f"""
                 UPDATE {TITLES_TABLE}
-                SET {NAME_COL} = '{title_name.name}'
+                SET {NAME_COL} = '{title_name.name.replace("'", "\"")}'
                 WHERE {ID_COL} = '{title_name.id}'
                 """
             )
@@ -113,7 +113,7 @@ class DataParser:
             self.db_cursor.execute(
                 f"""
                 UPDATE {ACTORS_TABLE}
-                SET {NAME_COL} = '{actor_name.name}'
+                SET {NAME_COL} = '{actor_name.name.replace("'", "\"")}'
                 WHERE {ID_COL} = '{actor_name.id}'
                 """
             )

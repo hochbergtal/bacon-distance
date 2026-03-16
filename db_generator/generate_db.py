@@ -39,12 +39,17 @@ def main() -> None:
     elif len(sys.argv) == 2:
         result_file_path = sys.argv[1]
     else:
-        print(f"Usage:\n{sys.argv[0]} [result file path]")
+        print(f"Usage:\npython {sys.argv[0]} [result file path]")
         return
 
     parser = DataParser(TITLE_PRINCIPALS_NAME, TITLE_BASICS_NAME, NAME_BASICS_NAME)
+
+    print("DB generation started.")
+    print("filling titles and actors ID...")
     parser.fill_ids()
+    print("filling titles and actors names...")
     parser.fill_names()
+    print("copying to file...")
     parser.dump_to_file(result_file_path)
 
 

@@ -28,12 +28,10 @@ def iter_title_actors(
     :yields: an entry for an actor who played in a title
     """
     with open(title_principals_filename, "r") as tsvfile:
-        principals_reader = csv.reader(tsvfile, delimiter="\t")
-        # skip fields names row
-        next(principals_reader)
+        principals_reader = csv.DictReader(tsvfile, delimiter="\t")
         for row in principals_reader:
-            if row[3] == "actor":
-                yield TitleActor(row[0], row[2])
+            if row["category"] == "actor":
+                yield TitleActor(row["tconst"], row["nconst"])
 
 
 def iter_title_names(title_basics_filename: str) -> Generator[IdName, None, None]:
@@ -43,11 +41,9 @@ def iter_title_names(title_basics_filename: str) -> Generator[IdName, None, None
     :yields: an entry for a title ID and name
     """
     with open(title_basics_filename, "r") as tsvfile:
-        basics_reader = csv.reader(tsvfile, delimiter="\t")
-        # skip fields names row
-        next(basics_reader)
+        basics_reader = csv.DictReader(tsvfile, delimiter="\t")
         for row in basics_reader:
-            yield IdName(row[0], row[2])
+            yield IdName(row["tconst"], row["primaryTitle"])
 
 
 def iter_actor_names(name_basics_filename: str) -> Generator[IdName, None, None]:
@@ -57,8 +53,6 @@ def iter_actor_names(name_basics_filename: str) -> Generator[IdName, None, None]
     :yields: an entry for an actor ID and name
     """
     with open(name_basics_filename, "r") as tsvfile:
-        basics_reader = csv.reader(tsvfile, delimiter="\t")
-        # skip fields names row
-        next(basics_reader)
+        basics_reader = csv.DictReader(tsvfile, delimiter="\t")
         for row in basics_reader:
-            yield IdName(row[0], row[1])
+            yield IdName(row["nconst"], row["primaryName"])

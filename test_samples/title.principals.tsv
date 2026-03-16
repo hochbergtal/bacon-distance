@@ -2,9 +2,9 @@ tconst	ordering	nconst	category	job	characters
 tt0000001	1	nm0000001	self	\N	["Self"]
 tt0000001	2	nm0000003	actor	\N	\N
 tt0000001	3	nm0000004	actor	producer	\N
-tt0000001	4	nm0000002	cinematographer	director of photography	\N
+tt0000007	4	nm0000002	cinematographer	director of photography	\N
 tt0000002	1	nm0000002	actor	\N	\N
-tt0000002	2	nm0000003	composer	\N	\N
+tt0000007	2	nm0000003	composer	\N	\N
 tt0000003	1	nm0000006	actor	\N	\N
 tt0000003	2	nm0000005	actor	\N	\N
 tt0000003	3	nm0000001	actor	producer	\N

@@ -68,10 +68,12 @@ class DataParser:
     def fill_names(self) -> None:
         """Fill the titles' and actors' names from the given files to the data."""
         for title_name in iter_title_names(self.title_basics):
-            self.data.titles[title_name.id].name = title_name.name
+            if title_name.id in self.data.titles:
+                self.data.titles[title_name.id].name = title_name.name
 
         for actor_name in iter_actor_names(self.name_basics):
-            self.data.actors[actor_name.id].name = actor_name.name
+            if actor_name.id in self.data.actors:
+                self.data.actors[actor_name.id].name = actor_name.name
 
     def dump_to_file(self, path: str) -> None:
         """Dump the saved data to the given file in a JSON format.

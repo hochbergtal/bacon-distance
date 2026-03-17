@@ -2,6 +2,7 @@ import sqlite3
 import sys
 from typing import Union, Set, List, Tuple
 from math import inf
+from functools import lru_cache
 
 DEFAULT_DB_PATH = "bacon.db"
 TARGET_NAME = "Kevin Bacon"
@@ -16,60 +17,76 @@ ID_COL = "id"
 NAME_COL = "name"
 
 
-def get_distance(
-    root_id: str,
-    target_id: str,
-    db_cursor: sqlite3.Cursor,
-    passed_ids: Set[str] = set(),
-) -> Union[int, float]:
-    if root_id == target_id:
-        return 0
+class DistanceFinder:
+    def __init__(self, db_path: str) -> None:
+        self.db_connection = sqlite3.connect(db_path)
+        self.db_cursor = self.db_connection.cursor()
+        self.passed_ids: Set[str] = set()
 
-    adjacent_distances: List[Union[int, float]] = []
+        try:
+            self.db_cursor.execute(
+                f"CREATE INDEX actor_index ON {TITLE_ACTOR_TABLE} ({ACTOR_ID_COL})"
+            )
+        except sqlite3.OperationalError:
+            pass
 
-    adjacent_actors: List[Tuple[str]] = db_cursor.execute(
-        f"""
-        SELECT {ACTOR_ID_COL} FROM {TITLE_ACTOR_TABLE}
-        WHERE {ACTOR_ID_COL} != '{root_id}'
-        AND {TITLE_ID_COL} IN (
-            SELECT {TITLE_ID_COL} FROM {TITLE_ACTOR_TABLE}
-            WHERE {ACTOR_ID_COL} = '{root_id}'
-        )
-        """
-    ).fetchall()
+    def __enter__(self):
+        return self
 
-    for (actor,) in adjacent_actors:
-        if actor in passed_ids:
-            continue
-        passed_ids.add(actor)
-        distance = get_distance(actor, target_id, db_cursor, passed_ids)
-        adjacent_distances.append(distance)
-        passed_ids.remove(actor)
+    def __exit__(self, exc_type, exc, tb):
+        self.db_connection.close()
 
-    if len(adjacent_distances) > 0:
-        return min(adjacent_distances) + 1
-    return inf
+    def get_bacon_distance(self, actor_name: str) -> Union[int, float]:
+        (root_id,) = self.db_cursor.execute(
+            f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{actor_name}'"
+        ).fetchone()
+
+        (target_id,) = self.db_cursor.execute(
+            f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{TARGET_NAME}'"
+        ).fetchone()
+
+        return self.get_distance(root_id, target_id)
+
+    @lru_cache(maxsize=1024)
+    def get_distance(
+        self,
+        root_id: str,
+        target_id: str,
+    ) -> Union[int, float]:
+        if root_id == target_id:
+            return 0
+
+        adjacent_distances: List[Union[int, float]] = []
+
+        adjacent_actors: List[Tuple[str]] = self.db_cursor.execute(
+            f"""
+            SELECT {ACTOR_ID_COL} FROM {TITLE_ACTOR_TABLE}
+            WHERE {ACTOR_ID_COL} != '{root_id}'
+            AND {TITLE_ID_COL} IN (
+                SELECT {TITLE_ID_COL} FROM {TITLE_ACTOR_TABLE}
+                WHERE {ACTOR_ID_COL} = '{root_id}'
+            )
+            """
+        ).fetchall()
+
+        for (actor,) in adjacent_actors:
+            if actor in self.passed_ids:
+                continue
+            self.passed_ids.add(actor)
+            distance = self.get_distance(actor, target_id)
+            adjacent_distances.append(distance)
+            self.passed_ids.remove(actor)
+
+        if len(adjacent_distances) > 0:
+            return min(adjacent_distances) + 1
+        return inf
 
 
 def main() -> None:
-    root_actor_name = sys.argv[1]
-
-    db_connection = sqlite3.connect(DEFAULT_DB_PATH)
-    db_cursor = db_connection.cursor()
-
-    (root_id,) = db_cursor.execute(
-        f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{root_actor_name}'"
-    ).fetchone()
-    (target_id,) = db_cursor.execute(
-        f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{TARGET_NAME}'"
-    ).fetchone()
-
-    print(f"root: {root_id}\ntarget: {target_id}")
-    distance = get_distance(root_id, target_id, db_cursor)
-    print(f"{root_actor_name}'s distance from {TARGET_NAME} is {distance}")
-
-    db_cursor.close()
-    db_connection.close()
+    actor_name = sys.argv[1]
+    with DistanceFinder(DEFAULT_DB_PATH) as distance_finder:
+        distance = distance_finder.get_bacon_distance(actor_name)
+        print(f"{actor_name}'s Bacon distance is {distance}")
 
 
 if __name__ == "__main__":

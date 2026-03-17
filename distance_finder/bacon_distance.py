@@ -1,6 +1,6 @@
 import sqlite3
 import sys
-from typing import Union, Set, List
+from typing import Union, Set, List, Tuple
 from math import inf
 
 DEFAULT_DB_PATH = "bacon.db"
@@ -27,27 +27,24 @@ def get_distance(
 
     adjacent_distances: List[Union[int, float]] = []
 
-    titles_played_in = db_cursor.execute(
-        f"SELECT {TITLE_ID_COL} FROM {TITLE_ACTOR_TABLE} WHERE {ACTOR_ID_COL} = '{root_id}'"
+    adjacent_actors: List[Tuple[str]] = db_cursor.execute(
+        f"""
+        SELECT {ACTOR_ID_COL} FROM {TITLE_ACTOR_TABLE}
+        WHERE {ACTOR_ID_COL} != '{root_id}'
+        AND {TITLE_ID_COL} IN (
+            SELECT {TITLE_ID_COL} FROM {TITLE_ACTOR_TABLE}
+            WHERE {ACTOR_ID_COL} = '{root_id}'
+        )
+        """
     ).fetchall()
-    for (title,) in titles_played_in:
-        if title in passed_ids:
+
+    for (actor,) in adjacent_actors:
+        if actor in passed_ids:
             continue
-
-        passed_ids.add(title)
-        cast = db_cursor.execute(
-            f"SELECT {ACTOR_ID_COL} FROM {TITLE_ACTOR_TABLE} WHERE {TITLE_ID_COL} = '{title}'"
-        ).fetchall()
-        for (actor,) in cast:
-            if actor == root_id or actor in passed_ids:
-                continue
-
-            passed_ids.add(actor)
-            adjacent_distances.append(
-                get_distance(actor, target_id, db_cursor, passed_ids)
-            )
-            passed_ids.remove(actor)
-        passed_ids.remove(title)
+        passed_ids.add(actor)
+        distance = get_distance(actor, target_id, db_cursor, passed_ids)
+        adjacent_distances.append(distance)
+        passed_ids.remove(actor)
 
     if len(adjacent_distances) > 0:
         return min(adjacent_distances) + 1

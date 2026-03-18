@@ -2,7 +2,7 @@ from __future__ import annotations
 import sqlite3
 import sys
 import time
-from typing import Union, Set, List, Tuple
+from typing import Union, Set, List, Tuple, Optional
 from math import inf
 from queue import Queue
 
@@ -55,15 +55,18 @@ class DistanceFinder:
         return isinstance(exc, KeyboardInterrupt)
 
     def get_bacon_distance(self, actor_name: str) -> Union[int, float]:
-        (root_id,) = self.db.execute(
+        root_id_tuple: Optional[Tuple[str]] = self.db.execute(
             f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{actor_name}'"
         ).fetchone()
 
-        (target_id,) = self.db.execute(
+        target_id_tuple: Optional[Tuple[str]] = self.db.execute(
             f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{TARGET_NAME}'"
         ).fetchone()
 
-        return self.get_distance_dfs(root_id, target_id)
+        if root_id_tuple is None or target_id_tuple is None:
+            raise ValueError("Actor not found")
+
+        return self.get_distance_dfs(root_id_tuple[0], target_id_tuple[0])
 
     def get_distance_dfs(self, root_id: str, target_id: str) -> Union[int, float]:
         actors_queue: Queue[Tuple[str, int]] = Queue()

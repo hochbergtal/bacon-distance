@@ -10,8 +10,8 @@ tt0000003	2	nm0000003	actor	\N	\N
 tt0000003	3	nm0000001	actor	producer	\N
 tt0000003	4	nm0000002	actor	producer	\N
 tt0000004	1	nm0000010	actor	\N	\N
-tt0000004	2	nm0000005	actor	\N	["Blacksmith"]
 tt0000005	1	nm0000010	actor	\N	\N
 tt0000005	2	nm0000004	actor	\N	\N
 tt0000006	1	nm0000009	actor	\N	\N
-tt0000006	2	nm0000002	actor	\N	\N
+tt0000007	1	nm0000009	actor	\N	\N
+tt0000007	2	nm0000005	actor	\N	["Blacksmith"]

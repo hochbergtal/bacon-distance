@@ -71,7 +71,7 @@ class DataParser:
 
     def fill_ids(self) -> None:
         """Fill the titles' and actors' IDs from the given files to the DB."""
-        for title_actor in iter_title_actors(self.title_principals):
+        for i, title_actor in enumerate(iter_title_actors(self.title_principals)):
             self.db_cursor.execute(
                 f"""
                 INSERT INTO {TITLE_ACTOR_TABLE} VALUES (
@@ -96,9 +96,12 @@ class DataParser:
                 """
             )
 
+            if i == 2_000_000:
+                return
+
     def fill_title_names(self) -> None:
         """Fill the titles' names from the given files to the DB."""
-        for title_name in iter_title_names(self.title_basics):
+        for i, title_name in enumerate(iter_title_names(self.title_basics)):
             self.db_cursor.execute(
                 f"""
                 UPDATE {TITLES_TABLE}
@@ -107,9 +110,12 @@ class DataParser:
                 """
             )
 
+            if i == 4_000_000:
+                return
+
     def fill_actor_names(self) -> None:
         """Fill the actors' names from the given files to the DB."""
-        for actor_name in iter_actor_names(self.name_basics):
+        for i, actor_name in enumerate(iter_actor_names(self.name_basics)):
             self.db_cursor.execute(
                 f"""
                 UPDATE {ACTORS_TABLE}
@@ -117,3 +123,6 @@ class DataParser:
                 WHERE {ID_COL} = '{actor_name.id}'
                 """
             )
+
+            if i == 4_000_000:
+                return

@@ -103,7 +103,9 @@ def main() -> None:
         actor_name = sys.argv[1]
         db_path = sys.argv[2]
     else:
-        print(f"Usage:\npython {sys.argv[0]} ACTOR [DB-PATH]")
+        print("Usage:")
+        print(f"\tpython {sys.argv[0]} ACTOR [DB-PATH]")
+        print("\tACTOR's Bacon distance is X")
         return
 
     with DistanceFinder(db_path) as distance_finder:

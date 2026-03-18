@@ -2,18 +2,17 @@ from __future__ import annotations
 import sqlite3
 import sys
 import time
-from typing import Union, Set, List, Tuple, Optional
+from typing import Union, Set, Tuple, Optional, Type
 from math import inf
 from queue import Queue
 
-DEFAULT_DB_PATH = "bacon.db"
 TARGET_NAME = "Kevin Bacon"
+DEFAULT_DB_PATH = "bacon.db"
 
 TITLE_ACTOR_TABLE = "title_actor"
 TITLE_ID_COL = "title_id"
 ACTOR_ID_COL = "actor_id"
 
-TITLES_TABLE = "titles"
 ACTORS_TABLE = "actors"
 ID_COL = "id"
 NAME_COL = "name"
@@ -46,13 +45,13 @@ class DistanceFinder:
         self.start = time.time()
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> bool:
+    def __exit__(self, exc_type: Type[BaseException], _, __) -> bool:
         self.db.close()
 
         end = time.time()
         print(f"\ntook {end - self.start} seconds")
 
-        return isinstance(exc, KeyboardInterrupt)
+        return exc_type is KeyboardInterrupt
 
     def get_bacon_distance(self, actor_name: str) -> Union[int, float]:
         root_id_tuple: Optional[Tuple[str]] = self.db.execute(

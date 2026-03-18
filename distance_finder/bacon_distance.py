@@ -1,8 +1,8 @@
 import sqlite3
 import sys
+import time
 from typing import Union, Set, List, Tuple
 from math import inf
-from functools import lru_cache
 from queue import Queue
 
 DEFAULT_DB_PATH = "bacon.db"
@@ -26,6 +26,18 @@ class DistanceFinder:
         try:
             self.db_cursor.execute(
                 f"CREATE INDEX actor_index ON {TITLE_ACTOR_TABLE} ({ACTOR_ID_COL})"
+            )
+        except sqlite3.OperationalError:
+            pass
+        try:
+            self.db_cursor.execute(
+                f"CREATE INDEX title_index ON {TITLE_ACTOR_TABLE} ({TITLE_ID_COL})"
+            )
+        except sqlite3.OperationalError:
+            pass
+        try:
+            self.db_cursor.execute(
+                f"CREATE INDEX title_actor_index ON {TITLE_ACTOR_TABLE} ({TITLE_ID_COL}, {ACTOR_ID_COL})"
             )
         except sqlite3.OperationalError:
             pass
@@ -76,11 +88,23 @@ class DistanceFinder:
 
 
 def main() -> None:
-    actor_name = sys.argv[1]
-    with DistanceFinder(DEFAULT_DB_PATH) as distance_finder:
+    if len(sys.argv) == 2:
+        actor_name = sys.argv[1]
+        db_path = DEFAULT_DB_PATH
+    elif len(sys.argv) == 3:
+        actor_name = sys.argv[1]
+        db_path = sys.argv[2]
+    else:
+        print(f"Usage:\npython {sys.argv[0]} ACTOR [DB-PATH]")
+        return
+
+    with DistanceFinder(db_path) as distance_finder:
         distance = distance_finder.get_bacon_distance(actor_name)
         print(f"{actor_name}'s Bacon distance is {distance}")
 
 
 if __name__ == "__main__":
+    start = time.time()
     main()
+    end = time.time()
+    print(f"took {end - start} seconds")

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sqlite3
 import sys
 import time
@@ -20,40 +21,45 @@ NAME_COL = "name"
 
 class DistanceFinder:
     def __init__(self, db_path: str) -> None:
-        self.db_connection = sqlite3.connect(db_path)
-        self.db_cursor = self.db_connection.cursor()
+        self.db = sqlite3.connect(db_path)
 
         try:
-            self.db_cursor.execute(
+            self.db.execute(
                 f"CREATE INDEX actor_index ON {TITLE_ACTOR_TABLE} ({ACTOR_ID_COL})"
             )
         except sqlite3.OperationalError:
             pass
         try:
-            self.db_cursor.execute(
+            self.db.execute(
                 f"CREATE INDEX title_index ON {TITLE_ACTOR_TABLE} ({TITLE_ID_COL})"
             )
         except sqlite3.OperationalError:
             pass
         try:
-            self.db_cursor.execute(
+            self.db.execute(
                 f"CREATE INDEX title_actor_index ON {TITLE_ACTOR_TABLE} ({TITLE_ID_COL}, {ACTOR_ID_COL})"
             )
         except sqlite3.OperationalError:
             pass
 
-    def __enter__(self):
+    def __enter__(self) -> DistanceFinder:
+        self.start = time.time()
         return self
 
-    def __exit__(self, exc_type, exc, tb):
-        self.db_connection.close()
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        self.db.close()
+
+        end = time.time()
+        print(f"\ntook {end - self.start} seconds")
+
+        return isinstance(exc, KeyboardInterrupt)
 
     def get_bacon_distance(self, actor_name: str) -> Union[int, float]:
-        (root_id,) = self.db_cursor.execute(
+        (root_id,) = self.db.execute(
             f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{actor_name}'"
         ).fetchone()
 
-        (target_id,) = self.db_cursor.execute(
+        (target_id,) = self.db.execute(
             f"SELECT {ID_COL} FROM {ACTORS_TABLE} WHERE {NAME_COL} = '{TARGET_NAME}'"
         ).fetchone()
 
@@ -71,7 +77,7 @@ class DistanceFinder:
 
             checked_actors.add(curr_actor)
 
-            adjacent_actors: List[Tuple[str]] = self.db_cursor.execute(
+            adjacent_actors = self.db.execute(
                 f"""
                 SELECT {ACTOR_ID_COL} FROM {TITLE_ACTOR_TABLE}
                 WHERE {TITLE_ID_COL} IN (
@@ -79,7 +85,7 @@ class DistanceFinder:
                     WHERE {ACTOR_ID_COL} = '{curr_actor}'
                 )
                 """
-            ).fetchall()
+            )
             for (actor,) in adjacent_actors:
                 if actor not in checked_actors:
                     actors_queue.put((actor, curr_distance + 1))
@@ -104,7 +110,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    start = time.time()
     main()
-    end = time.time()
-    print(f"took {end - start} seconds")
